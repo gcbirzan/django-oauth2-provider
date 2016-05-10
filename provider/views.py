@@ -1,11 +1,11 @@
 import json
-import urlparse
+from urllib.parse import urlparse
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect, QueryDict
 from django.utils.translation import ugettext as _
 from django.views.generic.base import TemplateView
 from django.core.exceptions import ObjectDoesNotExist
-from oauth2.models import Client
+from provider.oauth2.models import Client
 from . import constants, scope
 
 
@@ -255,7 +255,7 @@ class Authorize(OAuthView, Mixin):
 
         try:
             client, data = self._validate_client(request, data)
-        except OAuthError, e:
+        except OAuthError as e:
             return self.error_response(request, e.args[0], status=400)
 
         authorization_form = self.get_authorization_form(request, client,
@@ -292,13 +292,13 @@ class Redirect(OAuthView, Mixin):
     an error.
     """
 
-    def error_response(self, error, mimetype='application/json', status=400,
+    def error_response(self, error, content_type='application/json', status=400,
             **kwargs):
         """
         Return an error response to the client with default status code of
         *400* stating the error as outlined in :rfc:`5.2`.
         """
-        return HttpResponse(json.dumps(error), mimetype=mimetype,
+        return HttpResponse(json.dumps(error), content_type=content_type,
                 status=status, **kwargs)
 
     def get(self, request):
@@ -457,13 +457,13 @@ class AccessToken(OAuthView, Mixin):
         """
         raise NotImplementedError
 
-    def error_response(self, error, mimetype='application/json', status=400,
+    def error_response(self, error, content_type='application/json', status=400,
             **kwargs):
         """
         Return an error response to the client with default status code of
         *400* stating the error as outlined in :rfc:`5.2`.
         """
-        return HttpResponse(json.dumps(error), mimetype=mimetype,
+        return HttpResponse(json.dumps(error), content_type=content_type,
                 status=status, **kwargs)
 
     def access_token_response(self, access_token):
@@ -488,7 +488,7 @@ class AccessToken(OAuthView, Mixin):
             pass
 
         return HttpResponse(
-            json.dumps(response_data), mimetype='application/json'
+            json.dumps(response_data), content_type='application/json'
         )
 
     def authorization_code(self, request, data, client):
@@ -596,5 +596,5 @@ class AccessToken(OAuthView, Mixin):
 
         try:
             return handler(request, request.POST, client)
-        except OAuthError, e:
+        except OAuthError as e:
             return self.error_response(e.args[0])

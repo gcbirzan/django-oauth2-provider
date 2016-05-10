@@ -31,17 +31,15 @@ def short_token():
     """
     Generate a hash that can be used as an application identifier
     """
-    hash = hashlib.sha1(shortuuid.uuid())
-    hash.update(settings.SECRET_KEY)
-    return hash.hexdigest()[::2]
+    return long_token()[::2]
 
 
 def long_token():
     """
     Generate a hash that can be used as an application secret
     """
-    hash = hashlib.sha1(shortuuid.uuid())
-    hash.update(settings.SECRET_KEY)
+    hash = hashlib.sha1(shortuuid.uuid().encode('ascii'))
+    hash.update(settings.SECRET_KEY.encode('ascii'))
     return hash.hexdigest()
 
 
